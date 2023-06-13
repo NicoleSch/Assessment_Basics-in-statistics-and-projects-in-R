@@ -258,4 +258,3 @@ difference in location
                  
 ## Conclusion
 The descriptive statistics of systolic blood pressure for the group that survived and the group that died during the study period have been calculated. These statistics provide an overview of the central tendency, dispersion, and range of systolic blood pressure in each group.There is evidence that the systolic blood pressure in the Framingham study population was higher in deceased individuals versus the individuals that survived. The Wilcoxon test was chosen for the analysis because the systolic blood pressure was not normally distributed. However, as there are 4434 individuals, a t-test would also have been appropriate to use because of this large sample size.
-
