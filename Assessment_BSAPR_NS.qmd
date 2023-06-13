@@ -1,0 +1,261 @@
+---
+title: "Report on association of systolic blood pressure and death with data from the Framingham study"
+author: "Nicole Schönenberger"
+date: "`r date()`"
+format:
+  html:
+    self-contained: true
+    code-link: true
+    code-fold: true
+    code-summary: "Code"
+    toc: true
+    df-print: paged
+    embed-resources: true
+---
+
+## Introduction
+
+This short report studies the systolic blood pressure in the dataset of the Framingham study and its association with death. The Framingham data can be obtained from the RiskCommunicator package of R. Details of this package can be found in: <https://cran.r-project.org/web/packages/riskCommunicator/index.html>. In this analysis, only the baseline data (timepoint = 0) is used.
+
+## Data import, data preparation, and loading libraries
+
+In a first step, data is imported and only the baseline data is selected. Additionally, libraries are loaded.
+
+```{r}
+#| output: false
+
+# Loading packages
+library(riskCommunicator)
+library(tidyverse)
+
+# Framingham heart study data
+framData <- riskCommunicator::framingham
+
+# We keep only the baseline data
+framData_base <- subset(framData, TIME == 0)
+
+```
+
+**Data preparation:**
+
+```{r}
+#Coding death as data
+framData_base <- framData_base |> 
+  mutate(DEATH =factor(DEATH, levels=c(0,1),labels=c("not dead","dead")))
+```
+
+## Descriptive statistics
+
+In this section, the descriptive statistics of the systolic blood pressure are calculated. This includes sample mean, median, quartiles, sample variance, sample standard deviation, range, and interquartile range (IQR). The descriptive statistics are shown separately for the group that survived and the one that died during the study period.
+
+**Mean of surviving individuals:**
+
+```{r}
+# Calculating the mean
+mean_bp_d0 <- mean(framData_base$SYSBP[framData_base$DEATH == "not dead"],
+                   na.rm = TRUE)
+mean_bp_d0
+```
+
+**Mean of deceased individuals:**
+
+```{r}
+# Calculating the mean
+mean_bp_d1 <- mean(framData_base$SYSBP[framData_base$DEATH == "dead"],
+                   na.rm = TRUE)
+mean_bp_d1
+```
+
+**Median of surviving individuals:**
+
+```{r}
+# Calculating the median
+median_bp_d0 <- median(framData_base$SYSBP[framData_base$DEATH == "not dead"],
+                   na.rm = TRUE)
+median_bp_d0
+```
+
+**Median of deceased individuals:**
+
+```{r}
+# Calculating the median
+median_bp_d1 <- median(framData_base$SYSBP[framData_base$DEATH == "not dead"],
+                   na.rm = TRUE)
+median_bp_d1
+```
+
+**Quartiles of surviving individuals:**
+
+```{r}
+# Calculating quartiles
+quart_bp_d0 <- quantile(framData_base$SYSBP[framData_base$DEATH == "not dead"], probs = c(0.25, 0.5, 0.75), na.rm = TRUE)
+quart_bp_d0
+```
+
+**Quartiles of deceased individuals:**
+
+```{r}
+# Calculating quartiles
+quart_bp_d1 <- quantile(framData_base$SYSBP[framData_base$DEATH == "dead"], probs = c(0.25, 0.5, 0.75), na.rm = TRUE)
+quart_bp_d1
+```
+
+**Sample variance of surviving individuals:**
+
+```{r}
+# Calculating sample variance
+var(framData_base$SYSBP[framData_base$DEATH == "not dead"], na.rm = TRUE)
+```
+
+**Sample variance of deceased individuals:**
+
+```{r}
+# Calculating sample variance
+var(framData_base$SYSBP[framData_base$DEATH == "dead"], na.rm = TRUE)
+```
+
+**Standard deviation of surviving individuals:**
+
+```{r}
+# Calculating standard deviation
+sd_bp_d0 <- sd(framData_base$SYSBP[framData_base$DEATH == "not dead"], na.rm = TRUE)
+sd_bp_d0 
+```
+
+**Standard deviation of deceased individuals:**
+
+```{r}
+# Calculating standard deviation
+sd_bp_d1 <- sd(framData_base$SYSBP[framData_base$DEATH == "dead"], na.rm = TRUE)
+sd_bp_d1 
+```
+
+**Range of systolic blood pressure of surviving individuals:**
+
+```{r}
+# Range of systolic blood pressure
+range(framData_base$SYSBP[framData_base$DEATH == "not dead"], na.rm = TRUE)
+```
+
+**Range of systolic blood pressure of deceased individuals:**
+
+```{r}
+# Range of systolic blood pressure
+range(framData_base$SYSBP[framData_base$DEATH == "dead"], na.rm = TRUE)
+```
+
+**Interquartile range of surviving individuals:**
+
+```{r}
+# Calculating interquartile range
+IQR(framData_base$SYSBP[framData_base$DEATH == "not dead"], na.rm = TRUE)
+```
+
+**Interquartile range of deceased individuals:**
+
+```{r}
+# Calculating interquartile range
+IQR(framData_base$SYSBP[framData_base$DEATH == "dead"], na.rm = TRUE)
+```
+
+**Summary of descriptive statistics of surviving individuals:**
+
+```{r}
+# Summary of descriptive statistics
+summary(framData_base$SYSBP[framData_base$DEATH == "not dead"])
+```
+
+**Summary of descriptive statistics of deceased individuals:**
+
+```{r}
+# Summary of descriptive statistics
+summary(framData_base$SYSBP[framData_base$DEATH == "dead"])
+```
+
+## Visual representation of systolic blood pressure
+
+[Fig-1](#fig-1) illustrates the systolic blood pressure in the framingham study population. The figure shows evidence that the systolic blood pressure is not normally distributed and that the data is skewed in both groups. When performing the Shapiro test in both groups the p-value is 2.2e-16, meaning that the data is not normally distributed. This is also visualized by the QQplots shown in [Fig-2](#fig-2) because the sample quantiles differ from the theoretical quantiles. In the boxplots [Fig-3](#fig-3) it is visualized that the systolic blood pressure in the deceased individuals were higher then the one in surviving individuals.
+
+```{r}
+#| label: Fig-1
+#| fig-cap: "Histograms of the systolic blood pressure of the group that survived the study duration (left histogram) and the individuals that died (right histogram). The solid lines represent the medians, whereas the dashed lines represent the respective means."
+#| fig-width: 8
+#| fig-height: 4
+# Plot distribution of blood pressure separately for patients that died and patients that did not
+ggplot(framData_base, aes(x = SYSBP, color = DEATH)) + 
+  geom_histogram(aes(y = after_stat(density)), breaks = seq(0, 250, by = 5), fill = "grey") +
+  geom_vline(aes(xintercept = median(SYSBP)), color = "black", linetype = "solid") +
+  geom_vline(aes(xintercept = mean(SYSBP)), color = "black", linetype = "dashed") +
+  facet_wrap(~DEATH) +
+  scale_color_manual(values = c("#999999", "#E69F00"))
+
+```
+
+**Shapiro test for surviving individuals:**
+```{r}
+# Shapiro test for surviving individuals
+shapiro_survived <- shapiro.test(framData_base$SYSBP[framData_base$DEATH == "not dead"])
+shapiro_survived
+```
+
+**Shapiro test for deceased individuals:**
+```{r}
+# Shapiro test for deceased individuals
+shapiro_deceased <- shapiro.test(framData_base$SYSBP[framData_base$DEATH == "dead"])
+shapiro_deceased
+
+```
+```{r}
+#| label: Fig-2
+#| fig-cap: "QQplots of the systolic blood pressure of both groups (surviving and deceased)."
+#| fig-width: 8
+#| fig-height: 4
+# QQplot for surviving and deceased individuals
+ggplot(framData_base, aes(sample = SYSBP)) +
+  geom_qq(color = "black") +
+  geom_qq_line(color = "red") +
+  facet_wrap(~ DEATH) +
+  labs(title = "QQplots of Systolic Blood Pressure",
+       x = "Theoretical Quantiles",
+       y = "Sample Quantiles") +
+  theme_minimal()
+
+# Boxplot with ggplot2
+#| label: Fig-3
+#| fig-cap: "Box plots of the systolic blood pressure of both groups (surviving and deceased)."
+#| fig-width: 8
+#| fig-height: 4
+ggplot(framData_base, aes(y = SYSBP, groups = DEATH, color = DEATH)) + 
+  geom_boxplot() +
+  scale_x_discrete() +
+  scale_color_manual(values = c("#999999", "#E69F00"))
+```
+
+## Wilcoxon test
+To analyze if the observed difference in median systolic blood pressure values are statistically significant, the Wilcoxon test was performed. The result of the Wilcoxon test suggests that there is evidence to support the presence of a significant difference in systolic blood pressure between deceased and surviving individuals in the studied dataset (difference in location = -12.5, 95% CI = -14.00 to -11.00, p=<2.2e-16). 
+
+```{r}
+#| output: false
+# Wilcoxon test
+data_dead <- subset(framData_base, DEATH == "dead")
+data_not_dead <- subset(framData_base, DEATH == "not dead")
+
+wilcox_result <- wilcox.test(data_dead$SYSBP, data_not_dead$SYSBP, alternative = "two.sided", correct = TRUE)
+# Print results
+cat("Wilcoxon Test Result:")
+print(wilcox_result)
+```
+Wilcoxon rank sum test with continuity correction
+
+data:  framData_baseSYSBP by framData_baseDEATH
+W = 1471742, p-value < 0.00000000000000022
+alternative hypothesis: true location shift is not equal to 0
+95 percent confidence interval:
+ -13.99993 -11.00005
+sample estimates:
+difference in location 
+                 -12.5 
+                 
+## Conclusion
+The descriptive statistics of systolic blood pressure for the group that survived and the group that died during the study period have been calculated. These statistics provide an overview of the central tendency, dispersion, and range of systolic blood pressure in each group.There is evidence that the systolic blood pressure in the Framingham study population was higher in deceased individuals versus the individuals that survived. The Wilcoxon test was chosen for the analysis because the systolic blood pressure was not equally distributed. However, as there are 4434 individuals, a t-statistics could also be used because of the large number of data.
+
